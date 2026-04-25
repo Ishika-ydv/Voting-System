@@ -3,7 +3,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import Poll from "../models/poll.model.js";
 
-export const createPoll = asyncHandler(async (req, res) => {
+const createPoll = asyncHandler(async (req, res) => {
   const {
     title,
     description,
@@ -23,7 +23,9 @@ export const createPoll = asyncHandler(async (req, res) => {
 
   // 2. Format options
   const formattedOptions = options.map((opt) => ({
-    name: opt,
+    name: opt.name,
+    description: opt.description || "",
+    photo: opt.photo || "",
   }));
 
   // 3. Create Poll
@@ -43,7 +45,7 @@ export const createPoll = asyncHandler(async (req, res) => {
 });
 
 
-export const getActivePolls = async (req, res) => {
+const getActivePolls = async (req, res) => {
   const now = new Date();
 
   const polls = await Poll.find({
@@ -57,7 +59,7 @@ export const getActivePolls = async (req, res) => {
   });
 };
 
-export const getAllPolls = async (req, res) => {
+const getAllPolls = async (req, res) => {
   const now = new Date();
 
   const polls = await Poll.find();
@@ -82,3 +84,119 @@ export const getAllPolls = async (req, res) => {
     data
   });
 };
+
+const getPollResults = asyncHandler(async (req, res) => {
+  const { pollId } = req.params;
+
+  const poll = await Poll.findById(pollId);
+
+  if (!poll) {
+    throw new ApiError(404, "Poll not found");
+  }
+
+  // 🔥 Always calculate (safe)
+  const totalVotes = poll.options.reduce(
+    (sum, opt) => sum + opt.count,
+    0
+  );
+
+  const results = poll.options.map((opt) => {
+    const percentage =
+      totalVotes === 0
+        ? 0
+        : ((opt.count / totalVotes) * 100).toFixed(2);
+
+    return {
+      optionId: opt._id,
+      option: opt.name,
+      votes: opt.count,
+      percentage: Number(percentage),
+    };
+  });
+
+  // 🏆 Winner logic (safe)
+  const maxVotes = Math.max(...results.map(r => r.votes));
+const winners = results.filter(r => r.votes === maxVotes);
+
+let winner = null;
+
+if (totalVotes > 0) {
+  winner =
+    winners.length > 1
+      ? winners.map(w => w.option) // tie case
+      : winners[0].option;
+}
+
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      {
+        pollId,
+        totalVotes,
+        results,
+        winner,
+      },
+      "Poll results fetched successfully"
+    )
+  );
+});
+
+const updatePoll = asyncHandler(async (req, res) => {
+  const { pollId } = req.params;
+  const { title, description, startsAt, endsAt } = req.body;
+
+  const poll = await Poll.findById(pollId);
+
+  if (!poll) {
+    throw new ApiError(404, "Poll not found");
+  }
+
+  // Prevent editing after start
+  if (poll.startsAt < new Date()) {
+    throw new ApiError(400, "Cannot update active/ended poll");
+  }
+
+  const updatedPoll = await Poll.findByIdAndUpdate(
+    pollId,
+    {
+      $set: {
+        title,
+        description,
+        startsAt,
+        endsAt,
+      },
+    },
+    { new: true }
+  );
+
+  return res.status(200).json(
+    new ApiResponse(200, updatedPoll, "Poll updated successfully")
+  );
+});
+
+
+const deletePoll = asyncHandler(async (req, res) => {
+  const { pollId } = req.params;
+
+  const poll = await Poll.findById(pollId);
+
+  if (!poll) {
+    throw new ApiError(404, "Poll not found");
+  }
+
+  await poll.deleteOne();
+
+  return res.status(200).json(
+    new ApiResponse(200, {}, "Poll deleted successfully")
+  );
+});
+
+export {
+    createPoll,
+    getActivePolls,
+    getAllPolls,
+    getPollResults,
+    updatePoll,
+    deletePoll
+
+}

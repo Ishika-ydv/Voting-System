@@ -257,13 +257,106 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 });
 
 
+const changeCurrentPassword = asyncHandler( async (req, res) => {
+    const {oldPassword, newPassword} = req.body;
+
+    //  Validation
+  if (!oldPassword || !newPassword) {
+    throw new ApiError(400, "Old and new password are required");
+  }
 
 
+    const user = await User.findById(req.user?._id);
+    const isPasswordCorrect = await user.isPasswordCorrect(oldPassword);
+
+    if(!isPasswordCorrect){
+        throw new ApiError(400 , "Invalid Password");
+
+    }
+
+
+    user.password = newPassword;
+    await user.save({validateBeforeSave: false});
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(200, {}, "Password Changed Successfully")
+    )
+
+});
+
+
+ const getCurrentUser = asyncHandler(async (req, res) => {
+  return res.status(200).json(
+    new ApiResponse(200, req.user, "Current user fetched successfully")
+  );
+});
+
+
+ const updateAccountDetails = asyncHandler(async (req, res) => {
+  const { name, email } = req.body;
+
+  // ✅ Validation
+  if (!name?.trim() || !email?.trim()) {
+    throw new ApiError(400, "Name and email are required");
+  }
+
+  // ✅ Update user
+  const user = await User.findByIdAndUpdate(
+    req.user?._id,
+    {
+      $set: {
+        name,
+        email,
+      },
+    },
+    { new: true, runValidators: true }
+  ).select("-password -refreshToken");
+
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  return res.status(200).json(
+    new ApiResponse(200, user, "Account details updated successfully")
+  );
+});
+
+
+ const logoutUser = asyncHandler(async (req, res) => {
+  // ✅ remove refresh token from DB
+  await User.findByIdAndUpdate(
+    req.user._id,
+    {
+      $unset: { refreshToken: 1 },
+    },
+    { new: true }
+  );
+
+  // ✅ cookie options (same as login)
+  const options = {
+    httpOnly: true,
+    secure: true,
+    sameSite: "strict",
+  };
+
+  return res
+    .status(200)
+    .clearCookie("accessToken", options)
+    .clearCookie("refreshToken", options)
+    .json(new ApiResponse(200, {}, "User logged out successfully"));
+});
 
 export{
     registerUser,
     loginUser,
     refreshAccessToken,
     sendOtp,
-    verifyOtp
+    verifyOtp,
+    changeCurrentPassword,
+    getCurrentUser,
+    updateAccountDetails,
+    logoutUser
+    
 }

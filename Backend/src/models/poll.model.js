@@ -4,11 +4,21 @@ const optionSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
-    trim: true
   },
+
+  description: {
+    type: String,
+    default: "",
+  },
+
+  photo: {
+    type: String,
+    default: "",
+  },
+
   count: {
     type: Number,
-    default: 0
+    default: 0,
   },
 });
 
