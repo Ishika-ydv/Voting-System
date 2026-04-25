@@ -7,8 +7,8 @@ import {User} from "../models/user.model.js";
   let token;
 
   // 1. Extract token safely
-  if (req.cookies?.accesstoken) {
-    token = req.cookies.accesstoken;
+  if (req.cookies?.accessToken) {
+    token = req.cookies.accessToken;
   } else if (req.headers.authorization?.startsWith("Bearer ")) {
     token = req.headers.authorization.split(" ")[1];
   }
@@ -45,7 +45,7 @@ import {User} from "../models/user.model.js";
 
 
 //ROLE-BASED ACCESS CONTROL (RBAC)
-const requireRole = (...roles) => {
+const verifyRole = (...roles) => {
   return (req, res, next) => {
     if (!req.user) {
       throw new ApiError(401, "Unauthorized");
@@ -66,7 +66,7 @@ const requireVerifiedUser = (req, res, next) => {
   }
 
   if (!req.user.isVerified) {
-    throw new ApiError(403, "User is not verified");
+    throw new ApiError(403, "User is not verified in DataBase");
   }
 
   next();
@@ -74,6 +74,6 @@ const requireVerifiedUser = (req, res, next) => {
 
 export {
     verifyJWT,
-    requireRole,
+    verifyRole,
     requireVerifiedUser
 }

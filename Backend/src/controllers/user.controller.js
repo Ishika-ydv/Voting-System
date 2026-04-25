@@ -3,6 +3,7 @@ import { User } from "../models/user.model.js";
 import {ApiError} from "../utils/ApiError.js";
 import {ApiResponse} from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
+import { sendEmail } from "../utils/sendEmail.js";
 
 const generateAccessAndRefreshTokens = async (userId) => {
   try {
@@ -31,13 +32,13 @@ const generateAccessAndRefreshTokens = async (userId) => {
 const registerUser = asyncHandler(async (req,res) =>{                               
   
 
-   const {name, email, password, organization} = req.body;
+   const {name, email, password,role, organization} = req.body;
 //    console.log("email:", email);
 //    console.log("name:", name);
 //    console.log("password:", password)
 
     if(
-        [name, email, password, organization].some(
+        [name, email, password, role, organization].some(
       (field) => !field || field.toString().trim() === ""
     )
     ){
@@ -56,6 +57,7 @@ const registerUser = asyncHandler(async (req,res) =>{
     const user = await User.create({
         name,
         email,
+        role,
         password: password,
         organization,
     });
@@ -77,6 +79,63 @@ const registerUser = asyncHandler(async (req,res) =>{
 
 });
 
+
+const sendOtp = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  const otp = Math.floor(100000 + Math.random() * 900000);
+
+  user.otp = otp;
+  user.otpExpires = Date.now() + 10 * 60 * 1000; // 10 min
+
+  await user.save({ validateBeforeSave: false });
+
+  await sendEmail(
+    email,
+    "Verify Your Account",
+    `Your OTP is: ${otp}`
+  );
+
+  return res.status(200).json(
+    new ApiResponse(200, {}, "OTP sent to email")
+  );
+});
+
+
+const verifyOtp = asyncHandler(async (req, res) => {
+  const { email, otp } = req.body;
+
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  if (String(user.otp) !== String(otp)) {
+    throw new ApiError(400, "Invalid OTP");
+  }
+
+  if (user.otpExpires < Date.now()) {
+    throw new ApiError(400, "OTP expired");
+  }
+
+  user.isVerified = true;
+  user.otp = null;
+  user.otpExpires = null;
+
+  await user.save({ validateBeforeSave: false });
+
+  return res.status(200).json(
+    new ApiResponse(200, {}, "User verified successfully")
+  );
+});
+
 const loginUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
@@ -84,7 +143,7 @@ const loginUser = asyncHandler(async (req, res) => {
   if (!email || !password) {
     throw new ApiError(400, "Email and password are required");
   }
-
+  
   // Find user
   const user = await User.findOne({ email });
   console.log(user)
@@ -99,7 +158,10 @@ const loginUser = asyncHandler(async (req, res) => {
   if (!isPasswordValid) {
     throw new ApiError(401, "Invalid credentials");
   }
-
+  
+  if (!user.isVerified) {
+  throw new ApiError(403, "Please verify your email first");
+  }
   // Generate tokens (pass user directly)
   const { accessToken, refreshToken } =
     await generateAccessAndRefreshTokens(user._id);
@@ -195,9 +257,13 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 });
 
 
+
+
+
 export{
     registerUser,
     loginUser,
-    refreshAccessToken
-
+    refreshAccessToken,
+    sendOtp,
+    verifyOtp
 }

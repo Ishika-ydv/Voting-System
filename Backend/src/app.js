@@ -20,9 +20,15 @@ app.use(cookieParser())
 //routes import
 
 import userRouter from "../src/routes/user.route.js"
+import pollRouter from "../src/routes/poll.route.js"
+import voteRoutes from "../src/routes/vote.route.js";
+
+
 
 //routes declaration
 app.use("/api/v1/users", userRouter)
+app.use("/api/v1/polls", pollRouter)
+app.use("/api/v1/votes", voteRoutes);
 
 
 // app.use((err, req, res, next) => {

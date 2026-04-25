@@ -18,19 +18,41 @@ const voteSchema = new mongoose.Schema({
     required: true,
   },
 
-  castedAt: { type: Date, default: Date.now },
+  // castedAt: {
+  //   type: Date,
+  //   default: Date.now,
+  //   index: true,
+  // },
 
-  ip: { type: String },
-  userAgent: { type: String },
+  ip: {
+    type: String,
+    default: null,
+  },
 
-  verified: { type: Boolean, default: false },
-});
+  userAgent: {
+    type: String,
+    default: null,
+  },
 
-// Unique constraint → ONE USER = ONE VOTE
+  verified: {
+    type: Boolean,
+    default: false,
+  },
+
+  source: {
+    type: String,
+    enum: ["web", "mobile", "api"],
+    default: "web",
+  }
+},{timestamps: true});
+
+// 🔐 One user = one vote per poll
 voteSchema.index({ userId: 1, pollId: 1 }, { unique: true });
 
-// Other indexes
+// ⚡ Performance indexes
 voteSchema.index({ pollId: 1 });
-voteSchema.index({ castedAt: 1 });
+voteSchema.index({ pollId: 1, optionId: 1 });
+
+voteSchema.index({ createdAt: -1 });
 
 export default mongoose.model("Vote", voteSchema);

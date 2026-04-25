@@ -1,72 +1,87 @@
 import mongoose from "mongoose";
 
 const optionSchema = new mongoose.Schema({
-    id: {
-        type: mongoose.Schema.Types.ObjectId,
-        default: () => new mongoose.Types.ObjectId(),
-    },
-    name: {
-        type: String,
-        required: true 
-    },
-    count: {
-        type: Number, 
-        default: 0 
-    },
+  name: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  count: {
+    type: Number,
+    default: 0
+  },
 });
 
-const pollSchema = new mongoose.Schema({
+const pollSchema = new mongoose.Schema(
+  {
     title: {
-        type: String,
-        required: true 
+      type: String,
+      required: true,
+      trim: true
     },
-    description:{
-        type: String 
+
+    description: {
+      type: String,
+      trim: true
     },
 
     createdBy: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-        required: true,
-        index: true,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+      index: true,
     },
 
     organization: {
-        type: String,
-        required: true,
-        index: true,
+      type: String,
+      required: true,
+      index: true,
+      trim: true
     },
 
-    options: [optionSchema],
+    options: {
+      type: [optionSchema],
+      validate: {
+        validator: (arr) => arr.length >= 2,
+        message: "At least 2 options required"
+      }
+    },
 
     startsAt: {
-        type: Date,
-        required: true 
+      type: Date,
+      required: true
     },
+
     endsAt: {
-        type: Date, 
-        required: true 
+      type: Date,
+      required: true
     },
 
-    isActive: {
-        type: Boolean, 
-        default: false, 
-        index: true 
-    },
+    // isActive: {
+    //   type: Boolean,
+    //   default: false,
+    //   index: true
+    // },
+
     resultDeclared: {
-        type: Boolean, 
-        default: false 
+      type: Boolean,
+      default: false
     },
 
-    totalVotes: { 
-        type: Number, 
-        default: 0 
-    },
+    totalVotes: {
+      type: Number,
+      default: 0
+    }
+  },
+  { timestamps: true }
+);
 
-    createdAt: { 
-        type: Date, 
-        default: Date.now 
-    },
+// Validate dates
+pollSchema.pre("save", function (next) {
+  if (this.endsAt <= this.startsAt) {
+    return next(new Error("End date must be after start date"));
+  }
+  //next();
 });
 
 // Indexes
