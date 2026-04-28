@@ -2,17 +2,20 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import Poll from "../models/poll.model.js";
+import { uploadOnCloudinary } from "../utils/cloudinary.js";
+
 
 const createPoll = asyncHandler(async (req, res) => {
-  const {
-    title,
-    description,
-    options,
-    startsAt,
-    endsAt,
-  } = req.body;
+  const { title, description, startsAt, endsAt } = req.body;
 
-  // 1. Validation
+  let options = req.body.options;
+
+  // 🛑 If options come as string (form-data), parse it
+  if (typeof options === "string") {
+    options = JSON.parse(options);
+  }
+
+  // ✅ Validation
   if (!title || !options || !startsAt || !endsAt) {
     throw new ApiError(400, "All required fields must be provided");
   }
@@ -21,20 +24,43 @@ const createPoll = asyncHandler(async (req, res) => {
     throw new ApiError(400, "At least 2 options are required");
   }
 
-  // 2. Format options
-  const formattedOptions = options.map((opt) => ({
+  // 📸 Handle uploaded images
+  const optionImages = req.files?.optionImages || [];
+
+  // ❌ Check if images are missing
+  // if (optionImages.length !== options.length) {
+  //   throw new ApiError(
+  //     400,
+  //     "Each option must have an image"
+  //   );
+  // }
+
+  const uploadedImages = [];
+
+  for (let file of optionImages) {
+    const uploaded = await uploadOnCloudinary(file.path);
+
+    if (!uploaded) {
+      throw new ApiError(400, "Image upload failed");
+    }
+
+    uploadedImages.push(uploaded.secure_url);
+  }
+
+  // 🧠 Map options with images
+  const formattedOptions = options.map((opt, index) => ({
     name: opt.name,
     description: opt.description || "",
-    photo: opt.photo || "",
+    photo: uploadedImages[index] || "", // match by index
   }));
 
-  // 3. Create Poll
+  // 🗳️ Create poll
   const poll = await Poll.create({
     title,
     description,
     options: formattedOptions,
-    startsAt: new Date(startsAt), // admin value
-    endsAt: new Date(endsAt),     // admin value
+    startsAt: new Date(startsAt),
+    endsAt: new Date(endsAt),
     createdBy: req.user._id,
     organization: req.user.organization,
   });
@@ -43,7 +69,6 @@ const createPoll = asyncHandler(async (req, res) => {
     new ApiResponse(201, poll, "Poll created successfully")
   );
 });
-
 
 const getActivePolls = async (req, res) => {
   const now = new Date();
