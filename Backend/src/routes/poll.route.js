@@ -21,14 +21,14 @@ router.get("/all", getAllPolls);//All poll with status
 router.get("/:pollId/results", verifyJWT, getPollResults);
 
 router.patch(
-  "/polls/:pollId",
+  "/:pollId",
   verifyJWT,
   verifyRole("admin"),
   updatePoll
 );
 
 router.delete(
-  "/polls/:pollId",
+  "/:pollId",
   verifyJWT,
   verifyRole("admin"),
   deletePoll
