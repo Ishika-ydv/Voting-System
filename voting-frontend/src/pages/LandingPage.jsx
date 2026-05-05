@@ -1,10 +1,11 @@
 import { Link } from "react-router-dom";
+import Footer from "../components/common/Footer";
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex flex-col">
+    <div className="min-h-screen bg-linear-to-br from-blue-50 to-indigo-100 flex flex-col">
 
-      {/* Navbar */}
+      {/* <Navbar /> */}
       <header className="flex justify-between items-center px-6 py-4 bg-white shadow-sm">
         <h1 className="text-xl font-bold text-gray-800">
           🗳️ VoteSecure
@@ -85,10 +86,8 @@ export default function LandingPage() {
       </main>
 
       {/* Footer */}
-      <footer className="text-center py-4 text-sm text-gray-500">
-        © {new Date().getFullYear()} VoteSecure. All rights reserved.
-      </footer>
-
+      <Footer />
+ 
     </div>
   );
 }

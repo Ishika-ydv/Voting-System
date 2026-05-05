@@ -12,7 +12,11 @@ export default function Register() {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm();
+  } = useForm({
+    defaultValues: {
+      role: "voter", // ✅ default role
+    },
+  });
 
   const navigate = useNavigate();
 
@@ -24,7 +28,7 @@ export default function Register() {
     setServerError("");
 
     try {
-      // ✅ send ALL required backend fields
+      // ✅ MATCH BACKEND EXACTLY
       await registerUser({
         name: data.name,
         email: data.email,
@@ -37,11 +41,10 @@ export default function Register() {
 
       navigate("/verify-otp", { state: { email: data.email } });
     } catch (err) {
-      const message =
+      setServerError(
         err?.response?.data?.message ||
-        "Something went wrong. Please try again.";
-
-      setServerError(message);
+          "Something went wrong. Please try again."
+      );
     } finally {
       setLoading(false);
     }
@@ -49,9 +52,13 @@ export default function Register() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+
       <div className="bg-white rounded-2xl shadow-md p-8 w-full max-w-md">
 
-        <h1 className="text-2xl font-bold mb-1">Create account</h1>
+        <h1 className="text-2xl font-bold mb-1">
+          Create account
+        </h1>
+
         <p className="text-sm text-gray-500 mb-6">
           Register to start voting securely
         </p>
@@ -62,13 +69,18 @@ export default function Register() {
           </div>
         )}
 
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="flex flex-col gap-4"
+        >
 
           {/* Name */}
           <Input
             label="Full name"
             error={errors.name?.message}
-            {...register("name", { required: "Name is required" })}
+            {...register("name", {
+              required: "Name is required",
+            })}
           />
 
           {/* Email */}
@@ -76,29 +88,37 @@ export default function Register() {
             label="Email"
             type="email"
             error={errors.email?.message}
-            {...register("email", { required: "Email is required" })}
+            {...register("email", {
+              required: "Email is required",
+            })}
           />
 
           {/* Password */}
           <PasswordInput
             label="Password"
             error={errors.password?.message}
-            {...register("password", { required: "Password is required" })}
+            {...register("password", {
+              required: "Password is required",
+            })}
           />
 
-          {/* 🔥 ROLE FIELD */}
+          {/* ROLE (FIXED) */}
           <div>
             <label className="text-sm font-medium text-gray-700">
               Role
             </label>
+
             <select
               className="w-full mt-1 border rounded-lg p-2"
-              {...register("role", { required: "Role is required" })}
+              {...register("role", {
+                required: "Role is required",
+              })}
+              defaultValue="voter"
             >
-              <option value="">Select role</option>
-              <option value="user">User</option>
+              <option value="voter">Voter</option>
               <option value="admin">Admin</option>
             </select>
+
             {errors.role && (
               <p className="text-red-500 text-xs mt-1">
                 {errors.role.message}
@@ -106,7 +126,7 @@ export default function Register() {
             )}
           </div>
 
-          {/* 🔥 ORGANIZATION FIELD */}
+          {/* Organization */}
           <Input
             label="Organization"
             error={errors.organization?.message}

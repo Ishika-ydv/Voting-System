@@ -16,6 +16,7 @@ import Polls from "./pages/user/Polls";
 import Vote from "./pages/user/Vote";
 import Results from "./pages/user/Results";
 import Profile from "./pages/user/Profile";
+import VotedPoll from "./pages/user/VotedPoll";
 
 // 🔹 Admin Pages
 import CreatePoll from "./pages/admin/CreatePoll";
@@ -44,6 +45,8 @@ export default function App() {
         <Route path="/polls/:id" element={<PrivateRoute><Vote /></PrivateRoute>} />
         <Route path="/polls/:id/results" element={<PrivateRoute><Results /></PrivateRoute>} />
         <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
+
+        <Route path="/polls/:id/voted" element={<VotedPoll />} />
 
         {/* ADMIN */}
         <Route path="/admin/polls" element={<AdminRoute><ManagePolls /></AdminRoute>} />

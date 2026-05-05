@@ -1,151 +1,162 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import toast from "react-hot-toast";
 
-import { getPollResults } from "../../api/resultsApi";
-import { castVote } from "../../api/votesApi";
+import { PollsAPI } from "../../api/pollsApi";
+import { VotesAPI } from "../../api/votesApi";
+import { useAuth } from "../../context/AuthContext";
 
 import Button from "../../components/common/Button";
 
 export default function Vote() {
   const { id } = useParams();
-  const navigate = useNavigate();
+  const { isVoter } = useAuth();
 
   const [poll, setPoll] = useState(null);
-  const [selected, setSelected] = useState("");
-  const [voted, setVoted] = useState(false);
+  const [selectedOption, setSelectedOption] = useState("");
   const [loading, setLoading] = useState(false);
-  const [fetching, setFetching] = useState(true);
 
-  // 🔥 Fetch poll
+  const [hasVoted, setHasVoted] = useState(false);
+  const [votedOption, setVotedOption] = useState(null);
+
+  // 🚫 BLOCK ADMIN
+  if (!isVoter) {
+    return (
+      <div className="max-w-2xl mx-auto p-6">
+        <h1 className="text-2xl font-bold text-red-600">
+          Access Denied 🚫
+        </h1>
+        <p className="mt-2 text-gray-600">
+          Only users are allowed to vote.
+        </p>
+      </div>
+    );
+  }
+
+  // 🔥 FETCH POLL
   useEffect(() => {
     const fetchPoll = async () => {
       try {
-        setFetching(true);
-        const res = await getPollResults(id);
-        setPoll(res?.data);
-      } catch {
+        const res = await PollsAPI.getById(id);
+        setPoll(res?.data?.data);
+      } catch (err) {
         toast.error("Failed to load poll");
-      } finally {
-        setFetching(false);
       }
     };
 
     fetchPoll();
   }, [id]);
 
-  // 🗳️ Submit vote
+  // 🧠 HANDLE VOTE
   const handleVote = async () => {
-    if (!selected) {
+    if (!selectedOption) {
       toast.error("Please select an option");
       return;
     }
 
-    setLoading(true);
-
     try {
-      await castVote(id, selected);
+      setLoading(true);
 
-      setVoted(true);
-      toast.success("Vote submitted successfully 🎉");
+      // ✅ IMPORTANT FIX: send object
+      await VotesAPI.vote({
+        pollId: id,
+        optionId: selectedOption,
+      });
+
+      // find chosen option
+      const chosen = poll?.options?.find(
+        (opt) => opt._id === selectedOption
+      );
+
+      setHasVoted(true);
+      setVotedOption(chosen);
+
+      toast.success("Vote submitted 🎉");
     } catch (err) {
-      const status = err?.response?.status;
-
-      // already voted
-      if (status === 409) {
-        setVoted(true);
-        toast.error("You have already voted");
-      } else {
-        toast.error(
-          err?.response?.data?.message || "Vote failed"
-        );
-      }
+      toast.error(
+        err?.response?.data?.message || "Vote failed"
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  // ⏳ Loading state
-  if (fetching) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <p className="text-gray-500">Loading poll...</p>
-      </div>
-    );
-  }
-
-  // 🚨 No poll found
   if (!poll) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <p className="text-gray-500">Poll not found</p>
-      </div>
-    );
+    return <p className="p-6">Loading poll...</p>;
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 px-4 py-8">
-      <div className="max-w-2xl mx-auto">
+    <div className="max-w-2xl mx-auto p-6">
 
-        {/* Title */}
-        <h1 className="text-2xl font-bold text-gray-800 mb-2">
-          {poll.title}
-        </h1>
+      {/* ✅ SUCCESS UI */}
+      {hasVoted && votedOption && (
+        <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded">
+          <h2 className="text-green-700 font-semibold">
+            ✅ You already voted
+          </h2>
 
-        <p className="text-gray-500 mb-6">
-          {poll.description}
-        </p>
+          <p className="text-green-600 mt-1">
+            Your choice: <b>{votedOption.name}</b>
+          </p>
 
-        {/* Already voted */}
-        {voted ? (
-          <div className="bg-green-50 border border-green-300 rounded-xl p-5 text-green-700">
-            <p className="font-medium">Vote submitted successfully 🎉</p>
+          {votedOption.description && (
+            <p className="text-sm text-green-500">
+              {votedOption.description}
+            </p>
+          )}
+        </div>
+      )}
 
-            <button
-              onClick={() => navigate(`/polls/${id}/results`)}
-              className="underline mt-2 inline-block"
-            >
-              View results
-            </button>
-          </div>
-        ) : (
-          <div className="flex flex-col gap-3">
+      {/* TITLE */}
+      <h1 className="text-2xl font-bold mb-2">
+        {poll.title}
+      </h1>
 
-            {/* Options */}
-            {poll.options?.map((opt) => (
-              <label
-                key={opt._id}
-                className={`flex items-center gap-3 p-4 rounded-xl border cursor-pointer transition ${
-                  selected === opt._id
-                    ? "border-blue-500 bg-blue-50"
-                    : "bg-white hover:bg-gray-50"
-                }`}
-              >
-                <input
-                  type="radio"
-                  name="option"
-                  value={opt._id}
-                  checked={selected === opt._id}
-                  onChange={() => setSelected(opt._id)}
-                />
+      <p className="text-gray-600 mb-4">
+        {poll.description}
+      </p>
 
-                <span className="font-medium text-gray-700">
-                  {opt.name}
-                </span>
-              </label>
-            ))}
+      {/* OPTIONS */}
+      <div className="space-y-3">
+        {poll.options?.map((opt) => (
+          <label
+            key={opt._id}
+            className={`flex items-center gap-3 border p-3 rounded transition ${
+              hasVoted
+                ? "opacity-60 cursor-not-allowed"
+                : "cursor-pointer hover:bg-gray-50"
+            }`}
+          >
+            <input
+              type="radio"
+              name="vote"
+              value={opt._id}
+              disabled={hasVoted}
+              onChange={() => setSelectedOption(opt._id)}
+            />
 
-            {/* Submit */}
-            <Button
-              onClick={handleVote}
-              disabled={loading}
-              className="mt-2"
-            >
-              {loading ? "Submitting..." : "Submit Vote"}
-            </Button>
-          </div>
-        )}
+            <div>
+              <p className="font-medium">{opt.name}</p>
+              <p className="text-sm text-gray-500">
+                {opt.description}
+              </p>
+            </div>
+          </label>
+        ))}
       </div>
+
+      {/* BUTTON */}
+      <Button
+        onClick={handleVote}
+        disabled={loading || hasVoted}
+        className="mt-5"
+      >
+        {hasVoted
+          ? "Already Voted"
+          : loading
+          ? "Voting..."
+          : "Submit Vote"}
+      </Button>
     </div>
   );
 }

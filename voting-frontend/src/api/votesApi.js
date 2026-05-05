@@ -1,5 +1,11 @@
 import api from "./axiosInstance";
 
-// 🗳️ CAST VOTE (verified + logged-in user)
-export const castVote = (pollId, optionId) =>
-  api.post("/votes/vote", { pollId, optionId });
+export const VotesAPI = {
+  vote: (pollId, optionId) =>
+    api.post("/votes/vote", {
+      pollId,
+      optionId,
+    }),
+  getStatus: (pollId) =>
+    api.get(`/votes/status/${pollId}`),
+};

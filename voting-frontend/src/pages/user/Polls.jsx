@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { PollsAPI } from "../../api/pollsApi";
+import { useNavigate } from "react-router-dom";
 
 import PollCard from "../../components/polls/PollCard";
 import { getPollStatus } from "../../utils/pollStatus";
+import { VotesAPI } from "../../api/votesApi";
 
 const TABS = ["ACTIVE", "UPCOMING", "ENDED"];
 
@@ -13,6 +15,9 @@ export default function Polls() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const navigate = useNavigate(); // ✅ FIXED (inside component)
+
+  // 🔥 Fetch polls
   useEffect(() => {
     const fetchPolls = async () => {
       try {
@@ -20,10 +25,6 @@ export default function Polls() {
         setError("");
 
         const res = await PollsAPI.getAll();
-
-        console.log("FULL RESPONSE:", res);
-
-        // ✅ FIX: correct extraction
         const data = res?.data?.data || [];
 
         setPolls(data);
@@ -39,7 +40,22 @@ export default function Polls() {
     fetchPolls();
   }, []);
 
-  // ✅ safe filter
+  // 🧠 CLICK HANDLER (IMPORTANT FIX)
+  const handlePollClick = async (pollId) => {
+    try {
+      const res = await VotesAPI.getStatus(pollId);
+
+      if (res.data.hasVoted) {
+        navigate(`/polls/${pollId}/voted`);
+      } else {
+        navigate(`/polls/${pollId}`);
+      }
+    } catch (err) {
+      navigate(`/polls/${pollId}`); // fallback
+    }
+  };
+
+  // 🔍 Filter polls by tab
   const filteredPolls = polls.filter((p) => {
     const status = getPollStatus(p?.startsAt, p?.endsAt);
     return status === tab;
@@ -85,7 +101,13 @@ export default function Polls() {
 
             {filteredPolls.length > 0 ? (
               filteredPolls.map((p) => (
-                <PollCard key={p._id} poll={p} />
+                <div
+                  key={p._id}
+                  onClick={() => handlePollClick(p._id)} // ✅ IMPORTANT FIX
+                  className="cursor-pointer"
+                >
+                  <PollCard poll={p} />
+                </div>
               ))
             ) : (
               <p className="text-gray-400 col-span-2 text-center">

@@ -3,25 +3,27 @@ import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
 import { PollsAPI } from "../../api/pollsApi";
-
 import OptionsBuilder from "../../components/admin/OptionsBuilder";
-import Navbar from "../../components/common/Navbar";
 import Input from "../../components/common/Input";
 import Button from "../../components/common/Button";
 
 export default function CreatePoll() {
   const [title, setTitle] = useState("");
   const [desc, setDesc] = useState("");
-  const [options, setOptions] = useState(["", ""]);
+
+  // ✅ UPDATED STRUCTURE
+  const [options, setOptions] = useState([
+    { name: "", description: "", image: null },
+    { name: "", description: "", image: null },
+  ]);
 
   const [startsAt, setStartsAt] = useState("");
   const [endsAt, setEndsAt] = useState("");
-
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
 
-  // 🧠 Validation
+  // ✅ VALIDATION
   const validate = () => {
     if (!title.trim()) {
       toast.error("Title is required");
@@ -29,54 +31,54 @@ export default function CreatePoll() {
     }
 
     if (!startsAt || !endsAt) {
-      toast.error("Start and End date are required");
+      toast.error("Start and End date required");
       return false;
     }
 
     if (new Date(startsAt) >= new Date(endsAt)) {
-      toast.error("Start date must be before End date");
+      toast.error("Start must be before End");
       return false;
     }
 
-    const cleaned = options.map((o) => o.trim()).filter(Boolean);
-
-    if (cleaned.length < 2) {
-      toast.error("At least 2 valid options required");
+    if (options.length < 2) {
+      toast.error("At least 2 options required");
       return false;
     }
 
     return true;
   };
 
-  // 🚀 Submit
+  // 🚀 SUBMIT
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!validate()) return;
 
     try {
       setLoading(true);
 
-      const payload = {
-        title: title.trim(),
-        description: desc.trim(),
-        startsAt,
-        endsAt,
-        options: options
-          .map((o) => o.trim())
-          .filter(Boolean)
-          .map((name) => ({ name })),
-      };
+      const formData = new FormData();
 
-      await PollsAPI.create(payload);
+      formData.append("title", title);
+      formData.append("description", desc);
+      formData.append("startsAt", startsAt);
+      formData.append("endsAt", endsAt);
+
+      // ✅ send options properly
+      options.forEach((opt, i) => {
+        formData.append(`options[${i}][name]`, opt.name);
+        formData.append(`options[${i}][description]`, opt.description);
+
+        if (opt.image) {
+          formData.append("optionImages", opt.image);
+        }
+      });
+
+      await PollsAPI.create(formData);
 
       toast.success("Poll created successfully 🎉");
-
       navigate("/admin/polls");
     } catch (err) {
-      toast.error(
-        err?.response?.data?.message || "Failed to create poll"
-      );
+      toast.error(err?.response?.data?.message || "Failed");
     } finally {
       setLoading(false);
     }
@@ -84,71 +86,48 @@ export default function CreatePoll() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-
-      {/* <Navbar /> */}
-
       <div className="max-w-2xl mx-auto px-4 py-8">
 
-        <h1 className="text-2xl font-bold mb-6 text-gray-800">
-          Create Poll
-        </h1>
+        <h1 className="text-2xl font-bold mb-6">Create Poll</h1>
 
         <form
           onSubmit={handleSubmit}
-          className="bg-white rounded-xl p-6 border flex flex-col gap-5"
+          className="bg-white p-6 rounded-xl border flex flex-col gap-5"
         >
 
-          {/* Title */}
           <Input
-            label="Poll Title"
+            label="Title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
 
-          {/* Description */}
-          <div>
-            <label className="text-sm font-medium text-gray-700">
-              Description
-            </label>
+          <textarea
+            placeholder="Description"
+            value={desc}
+            onChange={(e) => setDesc(e.target.value)}
+            className="border p-2 rounded"
+          />
 
-            <textarea
-              value={desc}
-              onChange={(e) => setDesc(e.target.value)}
-              className="mt-1 w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500"
-              rows={3}
-            />
-          </div>
+          {/* OPTIONS */}
+          <OptionsBuilder
+            options={options}
+            onChange={setOptions}
+          />
 
-          {/* Options */}
-          <div>
-            <label className="text-sm font-medium text-gray-700 mb-2 block">
-              Options
-            </label>
+          <Input
+            type="datetime-local"
+            label="Start"
+            value={startsAt}
+            onChange={(e) => setStartsAt(e.target.value)}
+          />
 
-            <OptionsBuilder
-              options={options}
-              onChange={setOptions}
-            />
-          </div>
+          <Input
+            type="datetime-local"
+            label="End"
+            value={endsAt}
+            onChange={(e) => setEndsAt(e.target.value)}
+          />
 
-          {/* Dates */}
-          <div className="grid grid-cols-2 gap-4">
-            <Input
-              label="Starts At"
-              type="datetime-local"
-              value={startsAt}
-              onChange={(e) => setStartsAt(e.target.value)}
-            />
-
-            <Input
-              label="Ends At"
-              type="datetime-local"
-              value={endsAt}
-              onChange={(e) => setEndsAt(e.target.value)}
-            />
-          </div>
-
-          {/* Submit */}
           <Button type="submit" disabled={loading}>
             {loading ? "Creating..." : "Create Poll"}
           </Button>
