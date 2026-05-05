@@ -1,114 +1,83 @@
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { logout } from "../../api/authApi";
-import { useState } from "react";
+
+import ProfileDropdown from "./ProfileDropdown";
+import AdminDropdown from "../../pages/admin/AdminDropdown";
 
 export default function Navbar() {
-  const { user, isAuthenticated, isAdmin, setUser, setRole } = useAuth();
+  const { isAuthenticated, isAdmin } = useAuth();
   const location = useLocation();
-  const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
 
   const navItems = [
     { name: "Home", path: "/polls" },
-    { name: "Dashboard", path: "/profile" },
+    { name: "Profile", path: "/profile" },
     { name: "Results", path: "/results" },
   ];
 
-  const handleLogout = async () => {
-    try {
-      setLoading(true);
-      await logout();
-      setUser(null);
-      setRole(null);
-      navigate("/login");
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
-    <nav className="bg-white shadow-sm py-3 px-6">
+    <nav className="bg-white border-b py-3 px-6">
       <div className="flex items-center justify-between max-w-7xl mx-auto">
-        
+
         {/* 🔷 Logo */}
         <Link
           to="/polls"
-          className="flex items-center gap-2 text-xl font-bold text-gray-800"
+          className="flex items-center gap-2 text-xl font-semibold text-gray-900"
         >
           <span className="text-2xl">✣</span>
           VoteSecure
         </Link>
 
         {/* 🔹 Center Navigation */}
-        <div className="hidden md:flex items-center gap-6">
-          {navItems.map((item) => (
-            <Link
-              key={item.name}
-              to={item.path}
-              className={`px-4 py-2 rounded-lg font-medium transition ${
-                location.pathname === item.path
-                  ? "bg-blue-600 text-white"
-                  : "text-gray-700 hover:bg-gray-100"
-              }`}
-            >
-              {item.name}
-            </Link>
-          ))}
+        <div className="hidden md:flex items-center gap-4">
 
-          {/* Admin Link */}
-          {isAdmin && (
-            <Link
-              to="/admin/polls"
-              className="px-4 py-2 rounded-lg font-medium text-red-600 hover:bg-red-50"
-            >
-              Admin
-            </Link>
-          )}
+          {navItems.map((item) => {
+            const isActive = location.pathname === item.path;
+
+            return (
+              <Link
+                key={item.name}
+                to={item.path}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
+                  isActive
+                    ? "bg-[#080838] text-white"
+                    : "text-gray-700 hover:bg-gray-100"
+                }`}
+              >
+                {item.name}
+              </Link>
+            );
+          })}
+
+          {/* ✅ ADMIN DROPDOWN */}
+          {isAdmin && <AdminDropdown />}
         </div>
 
         {/* 🔹 Right Side */}
         <div className="flex items-center gap-3">
+
           {!isAuthenticated ? (
             <>
               <Link
                 to="/login"
-                className="bg-blue-600 text-white px-5 py-2 rounded-full font-semibold hover:bg-blue-700"
+                className="px-4 py-2 rounded-full text-sm font-medium border text-gray-700 hover:bg-gray-100 transition"
               >
                 Log in
               </Link>
 
               <Link
                 to="/register"
-                className="bg-blue-600 text-white px-5 py-2 rounded-full font-semibold hover:bg-blue-700"
+                className="px-5 py-2 rounded-full text-sm font-semibold bg-[#080838] text-white hover:opacity-90 transition"
               >
                 Sign up
               </Link>
             </>
           ) : (
             <>
-              {/* User Avatar */}
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center text-xs font-bold">
-                  {user?.name?.charAt(0)?.toUpperCase()}
-                </div>
-                <span className="hidden sm:block text-sm text-gray-700">
-                  {user?.name}
-                </span>
-              </div>
-
-              {/* Logout */}
-              <button
-                onClick={handleLogout}
-                disabled={loading}
-                className="bg-red-600 text-white px-5 py-2 rounded-full font-semibold hover:bg-red-700 disabled:opacity-50"
-              >
-                {loading ? "..." : "Logout"}
-              </button>
+              {/* 👤 Profile Dropdown */}
+              <ProfileDropdown />
             </>
           )}
+
         </div>
       </div>
     </nav>

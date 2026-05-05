@@ -15,7 +15,7 @@ export default function PrivateRoute({ children }) {
 
   // 🔐 Not logged in → redirect to login
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/" replace />;
   }
 
   // ✅ Authorized
