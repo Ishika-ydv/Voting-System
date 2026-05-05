@@ -216,12 +216,28 @@ const deletePoll = asyncHandler(async (req, res) => {
   );
 });
 
+
+const getPollById = asyncHandler(async (req, res) => {
+  const { pollId } = req.params;
+
+  const poll = await Poll.findById(pollId);
+
+  if (!poll) {
+    throw new ApiError(404, "Poll not found");
+  }
+
+  return res.status(200).json(
+    new ApiResponse(200, poll, "Poll fetched successfully")
+  );
+});
+
 export {
     createPoll,
     getActivePolls,
     getAllPolls,
     getPollResults,
     updatePoll,
-    deletePoll
+    deletePoll,
+    getPollById
 
 }

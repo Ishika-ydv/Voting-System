@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createPoll, getActivePolls, getAllPolls, getPollResults, updatePoll,deletePoll } from "../controllers/poll.controller.js";
+import { createPoll, getActivePolls, getAllPolls, getPollResults, updatePoll,deletePoll, getPollById} from "../controllers/poll.controller.js";
 import { verifyJWT, verifyRole } from "../middlewares/auth.middleware.js";
 import { upload } from "../middlewares/multer.middleware.js";
 
@@ -19,6 +19,7 @@ router.post(
 router.get("/active", getActivePolls);//active polls
 router.get("/all", getAllPolls);//All poll with status
 router.get("/:pollId/results", verifyJWT, getPollResults);
+router.get("/:pollId", getPollById);
 
 router.patch(
   "/:pollId",

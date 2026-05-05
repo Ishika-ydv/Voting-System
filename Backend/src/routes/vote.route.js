@@ -1,6 +1,7 @@
 import express from "express";
-import { voteOnPoll } from "../controllers/vote.controller.js";
+import { voteOnPoll, checkVoteStatus } from "../controllers/vote.controller.js";
 import { verifyJWT, requireVerifiedUser } from "../middlewares/auth.middleware.js";
+import {onlyUser} from "../middlewares/onlyUser.middleware.js"
 
 const router = express.Router();
 
@@ -14,9 +15,15 @@ router.post(
   "/vote",
   verifyJWT,
   requireVerifiedUser,
+  onlyUser,
   voteOnPoll
 );
 
+router.get(
+  "/status/:pollId",
+  verifyJWT,
+  checkVoteStatus
+);
 
 
 export default router;

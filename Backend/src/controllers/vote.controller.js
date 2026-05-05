@@ -6,7 +6,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
-export const voteOnPoll = asyncHandler(async (req, res) => {
+ const voteOnPoll = asyncHandler(async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
 
@@ -69,3 +69,27 @@ export const voteOnPoll = asyncHandler(async (req, res) => {
     new ApiResponse(200, null, "Vote submitted successfully")
   );
 });
+
+ const checkVoteStatus = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+  const { pollId } = req.params;
+
+  const vote = await Vote.findOne({ userId, pollId });
+
+  if (!vote) {
+    return res.status(200).json({
+      hasVoted: false,
+    });
+  }
+
+  return res.status(200).json({
+    hasVoted: true,
+    optionId: vote.optionId,
+  });
+});
+
+export{
+  voteOnPoll,
+  checkVoteStatus
+
+}
