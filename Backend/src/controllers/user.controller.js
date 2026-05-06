@@ -178,7 +178,7 @@ const loginUser = asyncHandler(async (req, res) => {
     secure: true,        // set false in local dev if needed
     sameSite: "none",
     path: "/",
-    domain: ".onrender.com",
+    domain: "voting-system-e9a7.onrender.com",
   };
 
   // ✅ Response
@@ -240,7 +240,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
       secure: true,
       sameSite: "none",
       path: "/",
-      domain: ".onrender.com",
+      domain: "voting-system-e9a7.onrender.com",
     };
 
     return res
@@ -344,7 +344,7 @@ const changeCurrentPassword = asyncHandler( async (req, res) => {
     secure: true,
     sameSite: "none",
     path: "/",
-    domain: ".onrender.com",
+    domain: "voting-system-e9a7.onrender.com",
   };
 
   return res
