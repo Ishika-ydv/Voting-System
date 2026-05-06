@@ -50,7 +50,9 @@ app.use("/api/v1/votes", voteRoutes);
 //     message: "Internal Server Error",
 //   });
 // });
-
+app.get("/ping", (req, res) => {
+  res.send("Server is working ✅");
+});
 
 
 
