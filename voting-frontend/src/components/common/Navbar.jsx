@@ -8,10 +8,17 @@ export default function Navbar() {
   const { isAuthenticated, isAdmin } = useAuth();
   const location = useLocation();
 
+  // ✅ Detect landing page
+  const isLandingPage = location.pathname === "/";
+
+  // ✅ Dynamic nav items
   const navItems = [
     { name: "Home", path: "/polls" },
     { name: "Profile", path: "/profile" },
-    { name: "Results", path: "/results" },
+    {
+      name: isAdmin ? "Dashboard" : "Results", // 🔥 label change
+      path: isAdmin ? "/admin/results" : "/results", // 🔥 route change
+    },
   ];
 
   return (
@@ -20,37 +27,39 @@ export default function Navbar() {
 
         {/* 🔷 Logo */}
         <Link
-          to="/polls"
+          to="/"
           className="flex items-center gap-2 text-xl font-semibold text-gray-900"
         >
           <span className="text-2xl">✣</span>
           VoteSecure
         </Link>
 
-        {/* 🔹 Center Navigation */}
-        <div className="hidden md:flex items-center gap-4">
+        {/* 🔹 Center Navigation (HIDDEN on landing page) */}
+        {!isLandingPage && (
+          <div className="hidden md:flex items-center gap-4">
 
-          {navItems.map((item) => {
-            const isActive = location.pathname === item.path;
+            {navItems.map((item) => {
+              const isActive = location.pathname === item.path;
 
-            return (
-              <Link
-                key={item.name}
-                to={item.path}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-                  isActive
-                    ? "bg-[#080838] text-white"
-                    : "text-gray-700 hover:bg-gray-100"
-                }`}
-              >
-                {item.name}
-              </Link>
-            );
-          })}
+              return (
+                <Link
+                  key={item.name}
+                  to={item.path}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
+                    isActive
+                      ? "bg-[#080838] text-white"
+                      : "text-gray-700 hover:bg-gray-100"
+                  }`}
+                >
+                  {item.name}
+                </Link>
+              );
+            })}
 
-          {/* ✅ ADMIN DROPDOWN */}
-          {isAdmin && <AdminDropdown />}
-        </div>
+            {/* ✅ Admin Dropdown */}
+            {isAdmin && <AdminDropdown />}
+          </div>
+        )}
 
         {/* 🔹 Right Side */}
         <div className="flex items-center gap-3">
@@ -61,7 +70,7 @@ export default function Navbar() {
                 to="/login"
                 className="px-4 py-2 rounded-full text-sm font-medium border text-gray-700 hover:bg-gray-100 transition"
               >
-                Log in
+                Sign in
               </Link>
 
               <Link

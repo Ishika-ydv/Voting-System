@@ -79,7 +79,7 @@ export function AuthProvider({ children }) {
 
         isAuthenticated: !!user,
         isAdmin: role === "admin" || role === "superadmin",
-        isVoter: role === "user"
+        isVoter: role === "voter"
       }}
     >
       {children}

@@ -28,9 +28,13 @@ export default function Login() {
     try {
       const res = await login(data);
       const user = res?.data?.data?.user;
+      
 
       setUser(user);
-      setRole(user?.role);
+      setRole(user?.role?.toLowerCase());
+      console.log(user.role)
+
+      
 
       toast.success("Login successful");
 

@@ -12,7 +12,7 @@ const router = express.Router();
  * - optionally must be verified
  */
 router.post(
-  "/vote",
+  "/vote",  
   verifyJWT,
   requireVerifiedUser,
   onlyUser,

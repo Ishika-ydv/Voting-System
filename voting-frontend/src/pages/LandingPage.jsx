@@ -1,93 +1,161 @@
 import { Link } from "react-router-dom";
-import Footer from "../components/common/Footer";
+import { Shield, BarChart3, Users, CheckSquare } from "lucide-react";
+import votingImg from "../assets/voting.jpeg";
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-linear-to-br from-blue-50 to-indigo-100 flex flex-col">
+    <div className="bg-white">
 
-      {/* <Navbar /> */}
-      <header className="flex justify-between items-center px-6 py-4 bg-white shadow-sm">
-        <h1 className="text-xl font-bold text-gray-800">
-          🗳️ VoteSecure
-        </h1>
+      {/* ================= HERO ================= */}
+      <section className="max-w-7xl mx-auto px-6 py-16 flex flex-col lg:flex-row items-center gap-10">
 
-        <div className="flex gap-3">
-          <Link
-            to="/login"
-            className="px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-800"
-          >
-            Login
-          </Link>
+        {/* LEFT */}
+        <div className="flex-1">
+          <h1 className="text-4xl font-bold text-gray-900 mb-4 ml-5">
+            Voting System
+          </h1>
 
-          <Link
-            to="/register"
-            className="px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-          >
-            Sign Up
-          </Link>
-        </div>
-      </header>
-
-      {/* Hero Section */}
-      <main className="flex flex-1 items-center justify-center px-6">
-        <div className="text-center max-w-2xl">
-
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-800 leading-tight">
-            Secure Online Voting System
-          </h2>
-
-          <p className="mt-4 text-gray-600 text-lg">
-            Create polls, vote securely, and view real-time results with a modern,
-            transparent voting platform.
+          <p className="text-gray-600 mb-6 max-w-md ml-5">
+            A Secure Voting System is an online platform that allows users to vote safely and easily from anywhere. It ensures privacy and accuracy using secure authentication and encryption.
           </p>
 
-          <div className="mt-8 flex justify-center gap-4">
+          <p className="italic text-gray-800 font-medium ml-5">
+            “Your Vote. Your Voice — Anytime, Anywhere”
+          </p>
+
+          <div className="mt-6 flex gap-4 ml-5">
             <Link
               to="/register"
-              className="px-6 py-3 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700"
+              className="bg-[#080838] text-white px-6 py-2 rounded-md hover:opacity-90"
             >
               Get Started
             </Link>
 
             <Link
-              to="/polls"
-              className="px-6 py-3 bg-white border rounded-xl font-medium hover:bg-gray-100"
+              to="/login"
+              className="border px-6 py-2 rounded-md hover:bg-gray-100"
             >
-              View Polls
+              Sign in
             </Link>
           </div>
+        </div>
 
-          {/* Features */}
-          <div className="mt-12 grid md:grid-cols-3 gap-4 text-left">
+        {/* RIGHT IMAGE */}
+        <div className="flex-1 flex justify-center">
+            <img
+              src={votingImg}
+              alt="Online voting system"
+              className="w-full max-w-md object-contain"
+            />
+          </div>
+      </section>
 
-            <div className="bg-white p-4 rounded-xl shadow-sm">
-              <h3 className="font-semibold">🔐 Secure</h3>
-              <p className="text-sm text-gray-600 mt-1">
-                Protected with authentication & secure cookies
+      {/* ================= FEATURES ================= */}
+      <section className="bg-gray-50 py-16 px-6">
+        <div className="max-w-6xl mx-auto text-center">
+
+          <h2 className="text-3xl font-bold mb-2">
+            Why Choose Online Voting?
+          </h2>
+          <p className="text-gray-500 mb-10">
+            Built with cutting-edge technology to ensure every vote counts
+          </p>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+
+            {/* Card */}
+            <div className="bg-blue-100 p-6 rounded-xl shadow-sm text-left">
+              <Shield className="mb-3 text-[#080838]" />
+              <h3 className="font-semibold mb-2">Secure & Encrypted</h3>
+              <p className="text-sm text-gray-600">
+                Military-grade encryption ensures your vote remains confidential.
               </p>
             </div>
 
-            <div className="bg-white p-4 rounded-xl shadow-sm">
-              <h3 className="font-semibold">⚡ Fast Voting</h3>
-              <p className="text-sm text-gray-600 mt-1">
-                Real-time vote updates and instant results
+            <div className="bg-yellow-100 p-6 rounded-xl shadow-sm text-left">
+              <BarChart3 className="mb-3 text-[#080838]" />
+              <h3 className="font-semibold mb-2">Real-time Results</h3>
+              <p className="text-sm text-gray-600">
+                Watch results update live as votes are cast.
               </p>
             </div>
 
-            <div className="bg-white p-4 rounded-xl shadow-sm">
-              <h3 className="font-semibold">📊 Analytics</h3>
-              <p className="text-sm text-gray-600 mt-1">
-                View detailed poll results and insights
+            <div className="bg-pink-100 p-6 rounded-xl shadow-sm text-left">
+              <Users className="mb-3 text-[#080838]" />
+              <h3 className="font-semibold mb-2">Accessible to All</h3>
+              <p className="text-sm text-gray-600">
+                Vote from anywhere, anytime with ease.
+              </p>
+            </div>
+
+            <div className="bg-green-100 p-6 rounded-xl shadow-sm text-left">
+              <CheckSquare className="mb-3 text-[#080838]" />
+              <h3 className="font-semibold mb-2">Transparent Analytics</h3>
+              <p className="text-sm text-gray-600">
+                Full transparency with detailed analytics and audit trails.
               </p>
             </div>
 
           </div>
         </div>
-      </main>
+      </section>
 
-      {/* Footer */}
-      <Footer />
- 
+      {/* ================= HOW IT WORKS ================= */}
+      <section className="py-16 px-6">
+        <div className="max-w-6xl mx-auto text-center">
+
+          <h2 className="text-3xl font-bold mb-2">
+            How It Works?
+          </h2>
+          <p className="text-gray-500 mb-12">
+            Four simple steps to participate in democracy
+          </p>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-10">
+
+            {[
+              {
+                step: "1",
+                title: "Create Account",
+                desc: "Sign up with your email and verify your identity securely.",
+              },
+              {
+                step: "2",
+                title: "Browse Elections",
+                desc: "View all active elections available.",
+              },
+              {
+                step: "3",
+                title: "Cast Your Vote",
+                desc: "Submit your vote with a single click.",
+              },
+              {
+                step: "4",
+                title: "View Results",
+                desc: "Track results in real-time.",
+              },
+            ].map((item) => (
+              <div key={item.step} className="text-center">
+                
+                <div className="w-12 h-12 mx-auto mb-4 flex items-center justify-center rounded-full bg-linear-to-br from-[#080838] to-blue-400 text-white font-bold">
+                  {item.step}
+                </div>
+
+                <h3 className="font-semibold mb-2">
+                  {item.title}
+                </h3>
+
+                <p className="text-sm text-gray-600">
+                  {item.desc}
+                </p>
+
+              </div>
+            ))}
+
+          </div>
+        </div>
+      </section>
+
     </div>
   );
 }

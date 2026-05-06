@@ -18,7 +18,7 @@ export default function Footer() {
     "text-white/70 hover:text-white text-base block mb-3 transition";
 
   return (
-    <footer className="bg-linear-to-br from-[#1f2144] via-[#55139e] to-[#293e9e] text-white px-10 py-13 border-t-4 border-purple-500 mt-10 flex-1">
+    <footer className="bg-[#080838] text-white px-10 py-13 border-t-4 border-purple-500 mt-10 flex-1">
       <div className="max-w-7xl mx-auto grid md:grid-cols-2 lg:grid-cols-4 gap-8">
         
         {/* 🔷 Logo + Description */}

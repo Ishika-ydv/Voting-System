@@ -58,11 +58,10 @@ export default function AdminDropdown() {
             </Link>
 
             <Link
-              to="/admin/dashboard"
-              className="block px-4 py-2 hover:bg-gray-100"
-              onClick={() => setOpen(false)}
-            >
-              Results Dashboard
+                to="/admin/results"
+                className="block px-4 py-2 text-sm hover:bg-gray-100"
+                >
+                Results Dashboard
             </Link>
 
           </div>

@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import {User} from "../models/user.model.js";
 
  const verifyJWT = asyncHandler(async (req, res, next) => {
+    console.log("➡️ verifyJWT hit");
   let token;
 
   // 1. Extract token safely
@@ -31,6 +32,7 @@ import {User} from "../models/user.model.js";
 
     // 5. Attach user
     req.user = user;
+    console.log("JWT USER:", req.user);
 
     next();
 
@@ -61,10 +63,14 @@ const verifyRole = (...roles) => {
 
 //VERIFIED USER CHECK (for voting)
 const requireVerifiedUser = (req, res, next) => {
+
+  console.log("VERIFIED:", req.user?.isVerified);
   if (!req.user) {
     throw new ApiError(401, "Unauthorized");
   }
+ console.log("VERIFIED:", req.user?.isVerified);
 
+  
   if (!req.user.isVerified) {
     throw new ApiError(403, "User is not verified in DataBase");
   }

@@ -20,8 +20,14 @@ export const PollsAPI = {
 
   endPoll: (id) => api.patch(`${BASE}/${id}/end`),
 
+  // 🔹 Single poll result
   getResults: (id) => api.get(`${BASE}/${id}/results`),
 
-  // ✅ MUST BE HERE
+  getUserResults: () => api.get("/polls/results/user"),
+
+  // ✅ NEW — All poll results (for dashboard)
+  getAllResults: () => api.get(`${BASE}/results/all`),
+
+  // ✅ Voting
   vote: (data) => api.post("/votes/vote", data),
 };
