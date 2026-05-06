@@ -9,8 +9,8 @@ const allowedOrigin = process.env.CORS_ORIGIN;
 app.use(cors({
   origin: allowedOrigin,
   credentials: true,
-  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
+  // methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  // allowedHeaders: ["Content-Type", "Authorization"],
 }));
 console.log("CORS ORIGIN:",process.env.CORS_ORIGIN )
 
