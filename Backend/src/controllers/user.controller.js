@@ -177,6 +177,7 @@ const loginUser = asyncHandler(async (req, res) => {
     httpOnly: true,
     secure: true,        // set false in local dev if needed
     sameSite: "strict",
+    path: "/",
   };
 
   // ✅ Response
@@ -237,6 +238,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
       httpOnly: true,
       secure: true,
       sameSite: "none",
+      path: "/",
     };
 
     return res
@@ -339,6 +341,7 @@ const changeCurrentPassword = asyncHandler( async (req, res) => {
     httpOnly: true,
     secure: true,
     sameSite: "none",
+    path: "/",
   };
 
   return res

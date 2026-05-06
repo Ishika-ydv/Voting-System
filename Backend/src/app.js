@@ -14,6 +14,8 @@ app.use(cors({
 }));
 console.log("CORS ORIGIN:",process.env.CORS_ORIGIN )
 
+app.set("trust proxy", 1);
+
 app.use(express.json({limit: "16kb"}))
 app.use(express.urlencoded({extended: true, limit: "16kb"}))
 app.use(express.static("public"))
