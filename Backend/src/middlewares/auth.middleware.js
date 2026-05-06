@@ -19,6 +19,8 @@ import {User} from "../models/user.model.js";
     throw new ApiError(401, "Access token missing");
   }
 
+  // console.log("COOKIES:", req.cookies);
+
   try {
     // 3. Verify token
     const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
