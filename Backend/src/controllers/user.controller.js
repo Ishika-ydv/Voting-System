@@ -176,7 +176,7 @@ const loginUser = asyncHandler(async (req, res) => {
   const options = {
     httpOnly: true,
     secure: true,        // set false in local dev if needed
-    sameSite: "strict",
+    sameSite: "none",
     path: "/",
   };
 
