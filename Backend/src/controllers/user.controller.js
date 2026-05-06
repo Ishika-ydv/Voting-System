@@ -215,6 +215,8 @@ export {
   refreshAccessToken,
   sendOtp,
   verifyOtp,
+  changeCurrentPassword,
+  updateAccountDetails,
   getCurrentUser,
   logoutUser,
 };
